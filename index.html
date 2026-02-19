@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" onload="initGoogle()"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -406,7 +406,7 @@
     <div class="login-logo">🤖</div>
     <h2>AI Assistant</h2>
     <p>코웨이 글로벌 IT 기획팀<br/>문서 기반 질의응답 시스템</p>
-    <button class="google-btn" onclick="loginWithGoogle()">
+    <button class="google-btn" id="google-signin-btn">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
       Google 계정으로 로그인
     </button>
@@ -454,15 +454,26 @@
   const sendBtn    = document.getElementById('send-btn');
   const loginScreen = document.getElementById('login-screen');
 
-  // Google 로그인
-  function loginWithGoogle() {
+  // Google 로그인 초기화
+  function initGoogle() {
     google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: handleCredentialResponse,
-      auto_select: false
     });
-    google.accounts.id.prompt();
+
+    google.accounts.id.renderButton(
+      document.getElementById('google-signin-btn'),
+      {
+        theme: 'outline',
+        size: 'large',
+        width: 280,
+        text: 'signin_with',
+        locale: 'ko'
+      }
+    );
   }
+
+  function loginWithGoogle() {}
 
   function handleCredentialResponse(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
