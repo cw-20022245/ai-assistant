@@ -7,7 +7,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" onload="initGoogle()"></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
+  <script>
+    const CLIENT_ID = '851148174606-s7jb52v7tgqjiukqnk8gbi38bqac0sn1.apps.googleusercontent.com';
+    window.addEventListener('load', function() {
+      google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        callback: handleCredentialResponse,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-btn'),
+        { theme: 'outline', size: 'large', width: 280, locale: 'ko' }
+      );
+    });
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -406,10 +419,7 @@
     <div class="login-logo">🤖</div>
     <h2>AI Assistant</h2>
     <p>코웨이 글로벌 IT 기획팀<br/>문서 기반 질의응답 시스템</p>
-    <button class="google-btn" id="google-signin-btn">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-      Google 계정으로 로그인
-    </button>
+    <div id="google-signin-btn"></div>
   </div>
 </div>
 
@@ -444,7 +454,6 @@
 
 <script>
   const WEBHOOK_URL = 'https://n8n.infra.coway.do/webhook/39b6b111-47fb-4f4e-a8f0-eb0d18a0ace7/chat';
-  const CLIENT_ID = '851148174606-s7jb52v7tgqjiukqnk8gbi38bqac0sn1.apps.googleusercontent.com';
   const sessionId = 'session_' + Math.random().toString(36).slice(2);
 
   let currentUser = null;
@@ -453,27 +462,6 @@
   const inputEl    = document.getElementById('input');
   const sendBtn    = document.getElementById('send-btn');
   const loginScreen = document.getElementById('login-screen');
-
-  // Google 로그인 초기화
-  function initGoogle() {
-    google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: handleCredentialResponse,
-    });
-
-    google.accounts.id.renderButton(
-      document.getElementById('google-signin-btn'),
-      {
-        theme: 'outline',
-        size: 'large',
-        width: 280,
-        text: 'signin_with',
-        locale: 'ko'
-      }
-    );
-  }
-
-  function loginWithGoogle() {}
 
   function handleCredentialResponse(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
