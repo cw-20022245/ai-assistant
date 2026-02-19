@@ -430,7 +430,6 @@
     <p>문서 기반 질의응답 시스템</p>
   </div>
   <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-    <img id="user-avatar" class="user-avatar" style="display:none" />
     <span id="user-name" class="user-name"></span>
     <button class="logout-btn" onclick="logout()">로그아웃</button>
   </div>
@@ -478,9 +477,6 @@
 
   function showChatScreen() {
     loginScreen.style.display = 'none';
-    const avatar = document.getElementById('user-avatar');
-    avatar.src = currentUser.picture;
-    avatar.style.display = 'block';
     document.getElementById('user-name').textContent = currentUser.name;
   }
 
