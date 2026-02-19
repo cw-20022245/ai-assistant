@@ -173,11 +173,20 @@
     .msg.bot .bubble ul,
     .msg.bot .bubble ol {
       padding-left: 18px;
-      margin: 3px 0;
+      margin: 4px 0;
     }
 
-    .msg.bot .bubble li { margin: 2px 0; line-height: 1.5; }
-    .msg.bot .bubble li > p { margin: 0; }
+    .msg.bot .bubble li { 
+      margin: 0;
+      padding: 1px 0;
+      line-height: 1.5; 
+    }
+    .msg.bot .bubble li > p,
+    .msg.bot .bubble li > p:first-child,
+    .msg.bot .bubble li > p:last-child { 
+      margin: 0 !important; 
+      padding: 0 !important;
+    }
 
     .msg.bot .bubble strong {
       font-weight: 700;
