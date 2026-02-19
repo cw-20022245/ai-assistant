@@ -6,6 +6,7 @@
   <title>AI Assistant</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -151,6 +152,74 @@
       color: #fff;
     }
 
+    /* 마크다운 스타일 */
+    .msg.bot .bubble h1,
+    .msg.bot .bubble h2,
+    .msg.bot .bubble h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 12px 0 6px;
+      color: var(--text);
+    }
+
+    .msg.bot .bubble h1:first-child,
+    .msg.bot .bubble h2:first-child,
+    .msg.bot .bubble h3:first-child { margin-top: 0; }
+
+    .msg.bot .bubble p { margin: 6px 0; }
+    .msg.bot .bubble p:first-child { margin-top: 0; }
+    .msg.bot .bubble p:last-child  { margin-bottom: 0; }
+
+    .msg.bot .bubble ul,
+    .msg.bot .bubble ol {
+      padding-left: 18px;
+      margin: 6px 0;
+    }
+
+    .msg.bot .bubble li { margin: 4px 0; line-height: 1.6; }
+
+    .msg.bot .bubble strong {
+      font-weight: 700;
+      color: #c8d8ff;
+    }
+
+    .msg.bot .bubble code {
+      background: rgba(79,138,255,0.12);
+      color: #a0c4ff;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'Consolas', monospace;
+    }
+
+    .msg.bot .bubble pre {
+      background: #0f1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+
+    .msg.bot .bubble pre code {
+      background: none;
+      padding: 0;
+      color: #a0c4ff;
+    }
+
+    .msg.bot .bubble hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 10px 0;
+    }
+
+    .msg.bot .bubble blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+      color: var(--text-muted);
+      margin: 6px 0;
+    }
+
     .typing .bubble {
       display: flex;
       align-items: center;
@@ -251,7 +320,7 @@
 <div id="messages">
   <div class="welcome">
     <div class="icon">💬</div>
-    <h2>글로벌IT기획팀 챗봇입니다.</h2>
+    <h2>무엇이 궁금하신가요?</h2>
     <p>저장된 문서를 기반으로 질문에 답변드립니다.<br/>아래 입력창에 질문을 입력해보세요.</p>
   </div>
 </div>
@@ -285,7 +354,11 @@
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.textContent = text;
+    if (role === 'bot') {
+      bubble.innerHTML = marked.parse(text);
+    } else {
+      bubble.textContent = text;
+    }
 
     msg.appendChild(avatar);
     msg.appendChild(bubble);
