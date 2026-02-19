@@ -356,7 +356,10 @@
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     if (role === 'bot') {
-      bubble.innerHTML = marked.parse(text);
+      marked.use({ breaks: true, gfm: true });
+      const html = marked.parse(text);
+      // li 안에 p태그가 생기면 간격이 넓어지므로 제거
+      bubble.innerHTML = html.replace(/<li><p>/g, '<li>').replace(/<\/p><\/li>/g, '</li>');
     } else {
       bubble.textContent = text;
     }
