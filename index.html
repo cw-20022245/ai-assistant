@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -303,13 +304,114 @@
 
     .hint { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 
-    .welcome { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-    .welcome .icon { font-size: 40px; margin-bottom: 14px; }
-    .welcome h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-    .welcome p { font-size: 13px; line-height: 1.7; }
+    /* 로그인 화면 */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      text-align: center;
+      width: 360px;
+    }
+
+    .login-logo {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 20px;
+    }
+
+    .login-card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 20px;
+      background: #fff;
+      color: #3c4043;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+
+    .google-btn:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+
+    .google-btn img { width: 18px; height: 18px; }
+
+    /* 유저 아바타 */
+    .user-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+
+    .user-name {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .logout-btn:hover { border-color: var(--accent); color: var(--text); }
   </style>
 </head>
 <body>
+
+<!-- 로그인 화면 -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🤖</div>
+    <h2>AI Assistant</h2>
+    <p>코웨이 글로벌 IT 기획팀<br/>문서 기반 질의응답 시스템</p>
+    <button class="google-btn" onclick="loginWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+      Google 계정으로 로그인
+    </button>
+  </div>
+</div>
 
 <header>
   <div class="logo">🤖</div>
@@ -317,9 +419,10 @@
     <h1>AI Assistant</h1>
     <p>문서 기반 질의응답 시스템</p>
   </div>
-  <div class="status">
-    <span class="dot"></span>
-    온라인
+  <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+    <img id="user-avatar" class="user-avatar" style="display:none" />
+    <span id="user-name" class="user-name"></span>
+    <button class="logout-btn" onclick="logout()">로그아웃</button>
   </div>
 </header>
 
@@ -341,11 +444,56 @@
 
 <script>
   const WEBHOOK_URL = 'https://n8n.infra.coway.do/webhook/39b6b111-47fb-4f4e-a8f0-eb0d18a0ace7/chat';
+  const CLIENT_ID = '851148174606-s7jb52v7tgqjiukqnk8gbi38bqac0sn1.apps.googleusercontent.com';
   const sessionId = 'session_' + Math.random().toString(36).slice(2);
+
+  let currentUser = null;
 
   const messagesEl = document.getElementById('messages');
   const inputEl    = document.getElementById('input');
   const sendBtn    = document.getElementById('send-btn');
+  const loginScreen = document.getElementById('login-screen');
+
+  // Google 로그인
+  function loginWithGoogle() {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: handleCredentialResponse,
+      auto_select: false
+    });
+    google.accounts.id.prompt();
+  }
+
+  function handleCredentialResponse(response) {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    currentUser = {
+      name: payload.name,
+      email: payload.email,
+      picture: payload.picture
+    };
+
+    // 로그인 화면 숨김
+    loginScreen.style.display = 'none';
+
+    // 헤더 유저 정보 표시
+    const avatar = document.getElementById('user-avatar');
+    avatar.src = currentUser.picture;
+    avatar.style.display = 'block';
+    document.getElementById('user-name').textContent = currentUser.name;
+  }
+
+  function logout() {
+    currentUser = null;
+    loginScreen.style.display = 'flex';
+    document.getElementById('user-avatar').style.display = 'none';
+    document.getElementById('user-name').textContent = '';
+    messagesEl.innerHTML = `
+      <div class="welcome">
+        <div class="icon">💬</div>
+        <h2>무엇이 궁금하신가요?</h2>
+        <p>저장된 문서를 기반으로 질문에 답변드립니다.<br/>아래 입력창에 질문을 입력해보세요.</p>
+      </div>`;
+  }
 
   function addMessage(role, text) {
     const welcome = messagesEl.querySelector('.welcome');
@@ -413,7 +561,12 @@
       const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatInput: text, sessionId })
+        body: JSON.stringify({
+          chatInput: text,
+          sessionId,
+          userName: currentUser?.name || '익명',
+          userEmail: currentUser?.email || ''
+        })
       });
 
       const data = await res.json();
