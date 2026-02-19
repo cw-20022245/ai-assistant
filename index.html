@@ -472,18 +472,28 @@
       picture: payload.picture
     };
 
-    // 로그인 화면 숨김
-    loginScreen.style.display = 'none';
+    localStorage.setItem('ai_user', JSON.stringify(currentUser));
+    showChatScreen();
+  }
 
-    // 헤더 유저 정보 표시
+  function showChatScreen() {
+    loginScreen.style.display = 'none';
     const avatar = document.getElementById('user-avatar');
     avatar.src = currentUser.picture;
     avatar.style.display = 'block';
     document.getElementById('user-name').textContent = currentUser.name;
   }
 
+  // 새로고침 시 로그인 유지
+  const saved = localStorage.getItem('ai_user');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showChatScreen();
+  }
+
   function logout() {
     currentUser = null;
+    localStorage.removeItem('ai_user');
     loginScreen.style.display = 'flex';
     document.getElementById('user-avatar').style.display = 'none';
     document.getElementById('user-name').textContent = '';
